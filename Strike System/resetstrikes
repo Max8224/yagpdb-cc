@@ -12,10 +12,10 @@
 {{ $user := .User }}
 {{ if ge (len .Message.Mentions) 1}}
 {{ $user = (index .Message.Mentions 0)}}
- {{(dbSet $user.ID "war-strikes" 0)}}
+ {{(dbSet $user.ID "user-strikes" 0)}}
 {{$embed := cembed
                         "title" "Strikes"
-                        "description"  (print "Number of strikes for " $user " is now ** " (dbGet $user.ID "war-strikes").Value " ** strikes")
+                        "description"  (print "Number of strikes for " $user " is now ** " (dbGet $user.ID "user-strikes").Value " ** strikes")
                         "color" 16711680 
                         "author" (sdict "name" (str $.User) "icon_url" ($.User.AvatarURL "512")) 
                         "timestamp"  currentTime 
@@ -24,10 +24,10 @@
 {{else}}
 {{ $args := parseArgs 1 "" (carg "member" "user id to get") }} 
 {{ $id:= ($args.Get 0).User }}
- {{(dbSet $user.ID "war-strikes" 0)}}
+ {{(dbSet $user.ID "user-strikes" 0)}}
 {{$embed := cembed
                         "title" "Strikes"
-                        "description"  (print "Number of strikes for " $id " is now ** " (dbGet $id.ID "war-strikes").Value " ** strikes")
+                        "description"  (print "Number of strikes for " $id " is now ** " (dbGet $id.ID "user-strikes").Value " ** strikes")
                         "color" 16711680 
                         "author" (sdict "name" (str $.User) "icon_url" ($.User.AvatarURL "512")) 
                         "timestamp"  currentTime 
