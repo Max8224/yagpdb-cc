@@ -1,0 +1,28 @@
+{{/*
+      Trigger: strikes
+      Trigger Type: Command
+      
+      Usage: strikes @user
+      
+      Views the strikes of the mentioned user. Can be used as strikes, without a mention to view your own strikes. This command also accepts IDs
+      
+      Made by Max Almighty#0001
+*/}}
+{{$member:= getMember .User.ID}}
+{{if .CmdArgs}}
+    {{if ($x:= (userArg (index .CmdArgs 0)))}}
+        {{$member = getMember $x}}
+    {{end}}
+{{end}}
+ 
+{{$totalStrikes:= (or (dbGet $member.User.ID "user-strikes").Value 0)}}
+ 
+{{$embed := sdict
+    "title" "Strikes"
+    "description"  (print "Number of strikes for " (or $member.Nick $member.User.Username) " ** " $totalStrikes " ** strikes")
+    "color" 16711680
+    "author" (sdict "name" (or $member.Nick $member.User.Username) "icon_url" ($member.User.AvatarURL "512"))
+    "timestamp" currentTime
+    "footer" (sdict "text" (print "Author ID - " $member.User.ID))
+}}
+{{sendMessage nil (cembed $embed)}}
