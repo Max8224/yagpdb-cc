@@ -1,0 +1,22 @@
+{{/*
+      Trigger: strike remove
+      Trigger Type: Command
+      
+      Usage: strike remove @user
+      
+      Removes a strike from the mentioned user
+      
+      Made by Max Almighty#0001
+*/}}
+{{ $user := .User }}
+{{ if ge (len .Message.Mentions) 1}}
+{{ $user = (index .Message.Mentions 0)}}
+{{end}}
+{{$embed := cembed
+                        "title" "Strike Removed!"
+                        "description"  (print "A strike has been removed from " $user "\nThey now have ** " (dbIncr $user.ID "user-strikes" -1) " ** strikes")
+                        "color" 65401 
+                        "author" (sdict "name" (str $.User) "icon_url" ($.User.AvatarURL "512")) 
+                        "timestamp"  currentTime 
+                        "footer" (sdict "text" (print "Author ID - " $.User.ID)) }}  
+{{sendMessage nil $embed}}
