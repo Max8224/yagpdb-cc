@@ -1,0 +1,21 @@
+{{/*
+      Trigger: strikelb
+      Trigger Type: Command
+      
+      Usage: strikelb
+      
+      Views the top 10 users who have strikes, alon with the number as a leaderboard
+      
+      Made by Max Almighty#0001
+*/}}
+
+{{$grab := ""}}
+{{$lb := dbTopEntries "user-strikes" 10 0}}
+{{range $lb}}
+{{$grab = print $grab  "` `  " .Value " strikes   \t        - - - -   \t      " .User.Mention "\n"}}
+{{end}}
+{{ $embed := cembed 
+	"title" "Strike Leaderboard"
+	 "description" (print "```Strikes - - - - User```\n " $grab "") 
+	"color" 16724480 }}
+{{ sendMessage nil $embed }}
