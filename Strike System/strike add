@@ -8,6 +8,7 @@
       
       Made by Max Almighty#0001
 */}}
+
 {{ $user := .User }}
 {{ if ge (len .Message.Mentions) 1}}
 {{ $user = (index .Message.Mentions 0)}}
