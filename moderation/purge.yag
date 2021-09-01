@@ -1,0 +1,12 @@
+{{/* Gets the number of messages to purge*/}}
+{{$args := parseArgs 1 "Wrong usage!"
+(carg "int" "messages to purge")}}
+{{$number := $args.Get 0 }}
+{{$messages := add $number 1}}
+
+{{/*Purges the messages*/}}
+{{exec "clear" $messages "-nopin"}}
+
+{{/*Sends the confirmation*/}}
+{{$msgID := sendMessageRetID nil (print "Successfully purged **" $number "** messages!")}}
+{{deleteMessage nil $msgID 3}}
