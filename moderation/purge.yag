@@ -1,3 +1,12 @@
+{{/*
+    Trigger Type - Command
+    Trigger - purge
+    
+    Usage: -purge [messages]
+    
+    Created by Max ツ#8224
+*/}}
+
 {{/* Gets the number of messages to purge*/}}
 {{$args := parseArgs 1 "Wrong usage!"
 (carg "int" "messages to purge")}}
