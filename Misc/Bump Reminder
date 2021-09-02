@@ -1,0 +1,24 @@
+{{/*
+    This is a command to remind your members to bump your server on disboard. You can do this via a timer command, but this is a more cleaner version of that.
+    You must a have a specific channel for bumps and it is recommended to set a speicifc slowmode in the channel.
+
+    Trigger Type: Regex
+    Trigger: \A
+    
+    Made by Max ツ#8224
+*/}}
+
+{{/*Configuration Variables*/}}
+{{$bumpmessage := "Sup losers, it's been 2 hours since you've bumped last. Run `!d bump` or I'll haunt you 👻"}} {{/*The message which should remind your members to bump*/}}
+{{$errormessage := "Oops, that was not the right command. The correct command is `!d bump`!"}} {{/*The message if they type domething other than !d bump*/}}
+{{$disboardlink := "https://disboard.org/server/844897030529613824"}} {{/*Insert the disboard link of your server over here*/}} 
+{{/*End of config variables*/}}
+
+{{/*Actual Code*/}}
+{{ if reFind `\A!d bump\z` .Message.Content  }}
+{{sendMessage nil (print "Thanks for bumping! Make sure to leave a review for our server here: " $disboardlink)}}
+{{sleep 7201}}
+{{sendMessage nil $bumpmessage}}
+{{else}}
+{{sendMessage nil $errormessage}}
+{{end}}
