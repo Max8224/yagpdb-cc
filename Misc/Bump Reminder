@@ -1,6 +1,6 @@
 {{/*
-    This is a command to remind your members to bump your server on disboard. You can do this via a timer command, but this is a more cleaner version of that.
-    You must a have a specific channel for bumps and it is recommended to set a speicifc slowmode in the channel.
+    This is a command to remind your members to bump your server on disboard. You can do this via a "Hourly interval" command, but this is a more cleaner version of that.
+    You must a have a specific channel for bumps and it is recommended to set a specific slowmode in the channel.
 
     Trigger Type: Regex
     Trigger: \A
@@ -16,9 +16,12 @@
 
 {{/*Actual Code*/}}
 {{ if reFind `\A!d bump\z` .Message.Content  }}
-{{sendMessage nil (print "Thanks for bumping! Make sure to leave a review for our server here: " $disboardlink)}}
-{{sleep 7201}}
-{{sendMessage nil $bumpmessage}}
+    {{if not .ExecData}}
+        {{sendMessage nil (print "Thanks for bumping! Make sure to leave a review for our server here: " $disboardlink ".")}}
+        {{execCC .CCID nil 7201 "data" }}
+    {{else}}
+        {{sendMessage nil $bumpmessage}}
+    {{end}}
 {{else}}
-{{sendMessage nil $errormessage}}
+    {{sendMessage nil $errormessage}}
 {{end}}
