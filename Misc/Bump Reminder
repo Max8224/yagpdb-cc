@@ -15,7 +15,7 @@
 {{/*End of config variables*/}}
 
 {{/*Actual Code*/}}
-{{ if reFind `\A!d bump\z` .Message.Content  }}
+{{ if reFind `\A!d bump\z` .Message.Content }}
     {{if not .ExecData}}
         {{sendMessage nil (print "Thanks for bumping! Make sure to leave a review for our server here: " $disboardlink ".")}}
         {{execCC .CCID nil 7201 "data" }}
