@@ -1,0 +1,36 @@
+{{/*  
+    Trigger type = command
+    Trigger = removeroles
+    Usage = -remove @user
+    
+    A template to remove all roles/certain selected roles from the given mention/user id. It is recommended to restrict the command to your admins, unless you would like everyone to be able to manage it. 
+
+    Made by Max ツ#8224
+*/}}
+
+{{/*Configuration variables*/}}
+{{$allroles:= false}} {{/*If this is set to true, this will remove every single role from user. If you want to remove certain roles, set this to false*/}}
+{{$roles:= cslice 873954443014590464 875242989771968582}} {{/*Roles to remove from user. Use only if $allroles is set to false*/}}
+{{/*End of config variables*/}}
+
+{{/*Actual code*/}}
+{{$args:= parseArgs 1 "" (carg "userid" "member")}}
+{{$member:= $args.Get 0}}
+
+{{if $allroles}}
+    {{setRoles $member cslice}}
+    Doneso 👌
+{{else}}
+    {{$count := 0}}
+    {{range $roles}}
+        {{if targetHasRoleID $member .}}
+            {{takeRoleID $member .}}
+            {{$count = add $count 1}}
+        {{end}}
+    {{end}}
+    {{if eq $count 0}}
+        {{sendMessage nil "User has no roles!"}}
+    {{else}}
+        Removed `{{$count}}` roles from `{{(getMember $member).User}}`
+    {{end}}
+{{end}}
