@@ -1,9 +1,9 @@
 {{/*  
-    Trigger type = command
-    Trigger = removeroles
-    Usage = -remove @user
-    
-    A template to remove all roles/certain selected roles from the given mention/user id. It is recommended to restrict the command to your admins, unless you would like everyone to be able to manage it. 
+    A template to remove all roles/certain selected roles from the given mention/user id. 
+    It is recommended to restrict the command to your admins, unless you would like everyone to be able to manage it. 
+
+    Trigger type - command
+    Trigger - remove
 
     Made by Max ツ#8224
 */}}
