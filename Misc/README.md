@@ -22,4 +22,4 @@ This command generates a sequence of random alphabets and/or numbers. It has the
 ![Preview of gen command](https://cdn.discordapp.com/attachments/885548605925097472/910476905327775804/Screenshot_2021-11-17_at_4.00.05_PM.png)
 
 ## Remove Roles
-This is a template to remove all/selected roles from a give user
+This is a template to remove all/selected roles from a given user
