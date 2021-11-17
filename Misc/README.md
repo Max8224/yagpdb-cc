@@ -1,1 +1,3 @@
-will do this later sowwi
+# Miscellaneous
+A group of miscellaneous commands for various reasons
+
