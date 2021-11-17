@@ -1,0 +1,51 @@
+{{/*Generates a random sequence of letters and/or numbers. Has optional flags of -n and -a to send the sequence in number or alphabets
+
+    Trigger type: Regex
+    Trigger: \A-(?i)(gen(?:erate)?)\b
+
+    Author: Max ツ <https://github.com/max-almighty> */}}
+
+{{/* Declaring Variables */}}
+{{$letters:= (split "qwertyuiopasdfghjklzxcvbnm1234567890" "")}} {{$length:= 0}} {{$error:= false}} {{$final:= ""}} 
+
+{{/* Parsing arguments and flags */}}
+{{if .CmdArgs}}
+    {{$length = toInt (index .CmdArgs 0)}}
+    {{if or (le $length 0) (ge $length 10001)}}
+        {{$error = "Please enter a valid positive number that is between 1 and 10000!"}} 
+    {{end}}
+    {{if reFind `(?i)-(a(?:lpha(?:bet)?)?|n(?:um(?:ber)?)?)\b` .StrippedMsg}}
+        {{if and (reFind `(?i)-(a(?:lpha(?:bet)?)?)\b` .StrippedMsg) (reFind `(?i)-(n(?:um(?:ber)?)?)\b` .StrippedMsg)}}
+            {{$error = "You can only use a single flag at a time!"}}
+        {{end}}
+        {{with reFindAllSubmatches `(?i)-(a(?:lpha(?:bet)?)?)\b` .StrippedMsg}}
+            {{$letters = (split "qwertyuiopasdfghjklzxcvbnm" "")}}
+        {{end}}
+        {{with reFindAllSubmatches `(?i)-(n(?:um(?:ber)?)?)\b` .StrippedMsg}}
+            {{$letters = (split "1234567890" "")}}
+        {{end}}
+    {{end}}
+{{else}}
+    {{$error = "No length provided! You require a value in `int` type to be provided for the length of the key, along with the optional `-a` and `-n` flags!"}} 
+{{end}}
+
+{{/* Sends the final generated sequence or the error */}}
+{{if not $error}}
+    {{range (seq 0 $length)}}
+        {{- $var:= randInt 2 -}}
+        {{- if $var -}}
+            {{- $final = print $final (upper (index (shuffle $letters) 0)) -}}
+        {{- else -}}
+            {{- $final = print $final (index (shuffle $letters) 0) -}}
+        {{- end}}
+    {{- end}}
+
+    {{if gt $length 2000}}
+        {{sendMessage nil (complexMessage "embed" (cembed "title" "Generated Key" "description" "⚠️ The key is too long to show within the embed, please refer the file given above!") "file" $final)}}
+    {{else}}
+        {{sendMessage nil (cembed "title" "Generated Key" "description" (joinStr "" "```" $final "```") "color" 0x2e3137)}}
+    {{end}}
+
+{{else}}
+    {{sendMessage nil (cembed "title" "Error" "description" (print "⚠️ " $error))}}
+{{end}}
