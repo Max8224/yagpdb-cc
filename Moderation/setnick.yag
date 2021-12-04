@@ -1,0 +1,60 @@
+{{/*Configuration Variables*/}}
+{{$roles:= cslice 844897839327084545}} {{/* People with at least one of these roles can run the command*/}}
+{{/* End of config variables*/}}
+
+{{$prefix := index (reFindAllSubmatches `Prefix of \x60\d+\x60: \x60(.+)\x60` (exec "prefix")) 0 1}} {{$whitelist:= false}} {{$error:= false}} {{$nick:= .User.Username}}
+
+{{/* Setting the whitelist */}}
+{{range $roles}}
+    {{- if getRole . -}}
+        {{- if or (hasRoleID .) (eq $.User.ID $.Guild.OwnerID) -}}
+            {{- $whitelist = true -}}
+        {{- end -}}
+    {{- else -}}
+        {{- $error = printf "The role %v is not a valid role in %s! Please fix this on the control panel!" . $.Guild.Name}}
+    {{- end}}
+{{- end}}
+
+{{/* The command */}}
+{{if reFind (print "(?i)\A" $prefix "set-?nick") .Message.Content}}
+    {{if $whitelist}}
+        {{if ge (len .CmdArgs) 2}}
+            {{with reFind `\d{17,19}` (index .CmdArgs 0)}}
+                {{$nick = reReplace (print (index $.Args 0) (index .Args 1)) $.Message.Content ""}}
+                {{if getMember .}}
+                    {{if gt (len $nick) 32}}
+                        {{$error = "Nickname too long! Please keep it under 32 characters!"}}
+                    {{else}}
+                        {{if eq . $.User.ID}}
+                            {{editNickname $nick}}
+                        {{else}}
+                            {{if not $error}}
+                                {{dbSet . "nickname-queue" $nick}}
+                                {{sendMessage nil (printf "`%s`'s nickname will be edited the next time they send a message!" (userArg .).String)}}
+                            {{end}}
+                        {{end}}
+                    {{end}}
+                {{else}}
+                    {{$error = "User not found! Make sure you have the right ID, and that the user is still in the server!"}}
+                {{end}}
+            {{else}}
+                {{$error = printf "The syntax of the command is `%vset-nick <User:Mention/ID> <String:New Nickname>`!" $prefix}}
+            {{end}}
+        {{else}}
+            {{$error = printf "The syntax of the command is `%vset-nick <User:Mention/ID> <String:New Nickname>`!" $prefix}}
+        {{end}}
+    {{else}}
+        {{$error = "You do not have a required role to run this command!"}}
+    {{end}}
+{{if $error}}
+    {{sendMessage nil (cembed "title" "Error!" "description" $error)}}
+{{end}}
+
+{{/* The nickname edit */}}
+{{else}}
+    {{with dbGet .User.ID "nickname-queue"}}
+        {{if not $error}}
+            {{editNickname .Value}}
+        {{end}}
+    {{end}}
+{{end}}
