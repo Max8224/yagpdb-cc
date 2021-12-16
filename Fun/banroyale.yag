@@ -1,0 +1,56 @@
+{{/*
+    A command that you can use to host ban royales! 
+    NOTE: DO NOT USE THIS COMMAND IN YOUR MAIN SERVER AS IT ACTUALLY BANS THE USERS
+    
+    Made by Max ツ#8224
+*/}}
+
+{{/*Configuration Variables*/}}
+{{$immuneroles:= cslice 909475073419771914 909475007258824724}} {{/* Role IDS of users immune to bans. */}}
+{{/* End of config variables*/}}
+
+{{$target:= ""}} {{$error:= false}} {{$immune:= false}}
+{{$prefix := index (reFindAllSubmatches `Prefix of \x60\d+\x60: \x60(.+)\x60` (exec "prefix")) 0 1}}
+
+{{if .CmdArgs}}
+    {{if .Message.Mentions}}
+        {{if (getMember ((index .Message.Mentions 0).ID | str ))}}
+            {{$target = (index .Message.Mentions 0).ID | str }}
+        {{else}}
+            {{$error = "No user found with that id!"}}
+        {{end}}
+    {{else if reFind `(?i)^(\d{17,18})` .StrippedMsg}}
+        {{if (getMember (index .CmdArgs 0))}}
+            {{$target = (index .CmdArgs 0)}}
+        {{else}}
+            {{$error = "No user found with that id!"}}
+        {{end}}
+    {{else}}
+        {{$error = print "Syntax of the command is `" $prefix "ban (mention/userid)`! Make sure that the user you have provided is still in the server!"}}
+    {{end}}
+{{else}}
+    {{$error = print "No user provided! Syntax of the command is `!ban (mention/userid)`!"}}
+{{end}}
+
+{{if $immuneroles}}
+    {{range $immuneroles}}
+        {{- if (targetHasRoleID $target .) -}}
+            {{- $immune = true -}}
+        {{- end}}
+    {{- end}}
+{{end}}
+
+{{if or $immune (eq $target .Guild.OwnerID)}}
+    {{$error = "The user you are trying to ban is immune from bans!"}}
+{{end}}
+
+{{if eq .User.ID (toInt $target)}}
+    {{$error = "You can't ban yourself!"}}
+{{end}}
+
+{{if not $error}}
+    {{sendMessage nil (print .User.Mention " just banned " (userArg $target).Username "! *Owned*")}} {{sleep 1}}
+    {{$silent:= (execAdmin "ban" $target "Ban Royale Ban!")}}
+{{else}}
+    {{sendMessage nil (print .User.Mention " " $error)}}
+{{end}}
