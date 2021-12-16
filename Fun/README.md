@@ -10,3 +10,6 @@ This a command that changes your nickname to another random one auto-generated b
 
 #### Command Preview
 ![Preview of nickme command](https://cdn.discordapp.com/attachments/885548605925097472/910475910774403092/Screenshot_2021-11-17_at_3.56.09_PM.png)
+
+## Ban Royale
+This a command that you can use as for ban royales. Will continue this readme later
