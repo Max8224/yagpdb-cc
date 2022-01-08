@@ -37,13 +37,20 @@
 {{end}}
 {{$perms:= (reReplace `.*\n` (execAdmin "viewperms" $user.ID) "")}}
 
-{{range $k, $v := $member.Roles}}
+{{$memberRoles := cslice}}
+{{range .Guild.Roles}}
+    {{- if in $.Member.Roles .ID -}}
+        {{- $memberRoles = $memberRoles.Append .ID -}}
+    {{- end}}
+{{end}}
+{{range $k, $v := $memberRoles}}
 	{{- if eq $k 0}} 
         {{- $roles = printf "- <@&%d>" .}}
 	{{- else }} 
         {{- $roles = printf "%s\n- <@&%d>" $roles .}} 
     {{- end -}}
 {{end}}
+
 {{$createdAt:= div $user.ID 4194304 | add 1420070400000 | mult 1000000 | toDuration | (newDate 1970 1 1 0 0 0).Add}} 
 {{$fields:= (cslice
 
