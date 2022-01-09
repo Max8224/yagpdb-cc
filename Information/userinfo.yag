@@ -39,7 +39,7 @@
 
 {{$memberRoles := cslice}}
 {{range .Guild.Roles}}
-    {{- if in $.Member.Roles .ID -}}
+    {{- if in $member.Roles .ID -}}
         {{- $memberRoles = $memberRoles.Append .ID -}}
     {{- end}}
 {{end}}
@@ -105,8 +105,6 @@
             {{$embed.Set "description" (print "Given below are the roles that " $user.Mention " has!")}}
         {{end}}
     {{$embed.Set "fields" $fields}}
-    {{else}}
-        {{$error = "Invalid arguments provided!"}}
     {{end}}
 {{end}}
 
