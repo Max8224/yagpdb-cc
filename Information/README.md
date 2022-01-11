@@ -8,6 +8,7 @@ Commands that show information about certain components in Discord.
 ### Work In Progress
 Emoji Info
 • Role Info
+• Avatar
 
 ### Stuff that might come in the future
 Server Info
