@@ -2,7 +2,8 @@
 Commands that show information about certain components in Discord.
 
 ### Commands
-• [User Info](https://github.com/Max-Almighty/yagpdb-cc/blob/main/Information/userinfo.yag)
+
+• [User Info](./userinfo.yag)
 
 ### Work In Progress
 Emoji Info

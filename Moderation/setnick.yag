@@ -16,7 +16,7 @@
 {{- end}}
 
 {{/* The command */}}
-{{if reFind (print "(?i)\A" $prefix "set-?nick") .Message.Content}}
+{{if reFind (print `(?i)\A\Q` $prefix `\Eset-?nick`) .Message.Content}}
     {{if $whitelist}}
         {{if ge (len .CmdArgs) 2}}
             {{with reFind `\d{17,19}` (index .CmdArgs 0)}}
