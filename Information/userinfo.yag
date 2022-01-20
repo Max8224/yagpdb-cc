@@ -7,109 +7,137 @@
     Made by Max ツ#8224
 */}}
 
-{{$error:= false}} {{$user:= .User}} {{$member:= .Member}} {{$strippedmsg:= .StrippedMsg}} {{$nick:= ":x: None Set!"}} {{$notable:= "None"}} {{$roles := ""}} {{$col := 16777215}}{{$p := 0}}
+{{$error:= false}} {{$user:= .User}} {{$member:= .Member}} {{$strippedmsg:= .StrippedMsg}} {{$nick:= "None Set!"}} {{$notable:= "None"}} {{$roles := ""}} {{$col := 16777215}}{{$p := 0}}{{$embed := sdict}}
 
 {{if gt (len .Args) 1}}
     {{if reFind `(?i)(<@!?\d{17,19}>|\d{17.19})` (index .Args 1)}}
-        {{if (getMember (index .Args 1))}}
+        {{if (userArg (index .Args 1))}}
             {{$member = getMember (index .Args 1)}} {{$user = $member.User}}
         {{else}}
             {{$error = "Invalid User provided!"}}
         {{end}}
     {{end}}
 {{end}}
-    
-{{$r := $member.Roles}}
-{{range .Guild.Roles}}
-    {{- if and (in $r .ID) (.Color) (lt $p .Position) -}}   
-        {{- $p = .Position}}{{$col = .Color -}}
-    {{- end}}
-{{end}}
-
-{{if .Member.Nick}}
-    {{$nick = .Member.Nick}}
-{{end}}
-{{$status:= (index (exec "whois" $user.ID).Fields 6).Value}}
-{{if reFind "Has no active status, is invisible/offline or is not in the bot's cache." $status}}
-    {{$status = ":x: User has no active status, or is invisible/offline"}}
-{{else if reFind `\ACustom Status:` $status}}
-    {{$status = (reReplace `\ACustom Status:` $status "")}}
-{{end}}
-{{$perms:= (reReplace `.*\n` (execAdmin "viewperms" $user.ID) "")}}
-
-{{$memberRoles := cslice}}
-{{range .Guild.Roles}}
-    {{- if in $member.Roles .ID -}}
-        {{- $memberRoles = $memberRoles.Append .ID -}}
-    {{- end}}
-{{end}}
-{{range $k, $v := $memberRoles}}
-	{{- if eq $k 0}} 
-        {{- $roles = printf "- <@&%d>" .}}
-	{{- else }} 
-        {{- $roles = printf "%s\n- <@&%d>" $roles .}} 
-    {{- end -}}
-{{end}}
 
 {{$createdAt:= div $user.ID 4194304 | add 1420070400000 | mult 1000000 | toDuration | (newDate 1970 1 1 0 0 0).Add}} 
-{{$fields:= (cslice
 
-    (sdict "name" "User ID" "value" (str $user.ID) "inline" true)
-    (sdict "name" "Bot" "value" ($user.Bot|json|str|title) "inline" true)
-    (sdict "name" "\u200B" "value" "\u200B" "inline" true)
-    (sdict "name" "Nickname" "value" $nick "inline" true)
-    (sdict "name" "Status" "value" $status "inline" true)
-    (sdict "name" "\u200B" "value" "\u200B" "inline" true)
-    (sdict "name" "Joined Server At" "value" (print "📆 <t:" (str (toInt ($member.JoinedAt.Parse).Unix)) ":F>\n🕛 <t:" (str (toInt ($member.JoinedAt.Parse).Unix)) ":R>"))
-    (sdict "name" "Account Created" "value" (print "📆 <t:" (str $createdAt.Unix) ":F>\n🕛 <t:" (str $createdAt.Unix) ":R>"))
-    )
-}}
-{{$embed:= sdict
-    "title" "User Information"
-    "description" (print "Given below is the information on the user " $user.Mention ". Use the optional `-p` and `-r` flags to view the user's permissions and/or roles!")
-    "fields" $fields
-    "color" $col
-    "thumbnail" (sdict "url" ($user.AvatarURL "1024"))
-    "footer" (sdict "text" (print "Triggered by " .User.String))
-    "timestamp" currentTime
-}}
 
-{{if eq $user.ID .Guild.OwnerID}}
-    {{$notable = "Server Owner"}}
-{{else if (in (split (index (split (exec "viewperms" $user.ID) "\n") 2) ", ") "Administrator")}}
-    {{$notable = "Server Administrator"}}
-{{else if and (in (split (index (split (exec "viewperms" $user.ID) "\n") 2) ", ") "ManageMessages") (in (split (index (split (exec "viewperms" $user.ID) "\n") 2) ", ") "BanMembers")}}
-    {{$notable = "Server staff"}}
-{{end}}
-
-{{if $strippedmsg}}
-    {{if reFind `(?i)-(p(?:erm(?:s|ission|issions)?)?|r(?:ole(?:s)?)?)\b` $strippedmsg}}
-        {{if and (reFind `(?i)-(p(?:erm(?:s|ission|issions)?)?)\b` $strippedmsg) (reFind `(?i)-(r(?:ole(?:s)?)?)\b` $strippedmsg)}}
-            {{$fields = (cslice
-                (sdict "name" (print "Roles (" (len $member.Roles) ")") "value" (or $roles "User has no roles!"))
-                (sdict "name" "Permissions" "value" $perms)
-                (sdict "name" "Notable Features" "value" $notable)
-                )
-            }}
-            {{$embed.Set "description" (print "Given below are the roles and permissions for the user " $user.Mention)}}
-        {{else if reFind `(?i)-(p(?:erm(?:s|ission|issions)?)?)\b` $strippedmsg}}
-            {{$fields = (cslice
-                (sdict "name" "Permissions" "value" $perms)
-                (sdict "name" "Notable Features" "value" $notable)
-            )}}
-            {{$embed.Set "description" (print "Given below are the permissions for the user " $user.Mention)}}
-        {{else if reFind `(?i)-(r(?:ole(?:s)?)?)\b` $strippedmsg}}
-            {{$fields = (cslice
-                (sdict "name" (print "Roles (" (len $member.Roles) ")") "value" (or $roles "User has no roles!"))
-            )}}
-            {{$embed.Set "description" (print "Given below are the roles that " $user.Mention " has!")}}
-        {{end}}
-    {{$embed.Set "fields" $fields}}
+{{if $member}}
+    {{$r := $member.Roles}}
+    {{range .Guild.Roles}}
+        {{- if and (in $r .ID) (.Color) (lt $p .Position) -}}   
+            {{- $p = .Position}}{{$col = .Color -}}
+        {{- end}}
     {{end}}
+
+    {{if $member.Nick}}
+        {{$nick = $member.Nick}}
+    {{end}}
+    {{$status:= (index (exec "whois" $user.ID).Fields 6).Value}}
+    {{if reFind "Has no active status, is invisible/offline or is not in the bot's cache." $status}}
+        {{$status = "User has no active status, or is invisible/offline"}}
+    {{else if reFind `\ACustom Status:` $status}}
+        {{$status = (reReplace `\ACustom Status:` $status "")}}
+    {{end}}
+
+    {{$perms:= (reReplace `.*\n` (execAdmin "viewperms" $user.ID) "")}}
+    {{$replacements := sdict "ManageServer" "Manage server" "ReadMessages" "Read Messages" "SendMessages" "Send Messages" "SendTTSMessages" "Send TTS Messages" "ManageMessages" "Manage Messages" "EmbedLinks" "Embed Links" "AttachFiles" "Attach Files" "ReadMessageHistory" "Read Message History" "MentionEveryone" "Mention Everyone" "UseExternalEmojis" "Use External Emojis" "VoiceConnect" "Voice Connect" "VoiceSpeak" "Voice Speak" "VoiceMuteMembers" "Voice Mute Members" "VoiceDeafenMembers" "Voice Deafen Members" "VoiceMoveMembers" "Voice Move Members"  "VoiceUseVAD" "Voice Use VAD" "ChangeNickname" "Change Nickname" "ManageNicknames" "Manage Nicknames" "ManageRoles" "Manage Roles" "ManageWebhooks" "Manage Webhooks" "ManageEmojis" "Manage Emojis" "CreateInstantInvite" "Create Invites" "KickMembers" "Kick Members" "BanMembers" "Ban Members" "ManageChannels" "Manage Channels" "AddReactions" "Add Reactions" "ViewAuditLogs" "View Audit Logs"}}
+    {{range $old, $new := $replacements}}
+		{{- $perms = joinStr $new (split $perms $old) -}}
+    {{end}}
+
+    {{$memberRoles := cslice}}
+    {{range .Guild.Roles}}
+        {{- if in $member.Roles .ID -}}
+            {{- $memberRoles = $memberRoles.Append .ID -}}
+        {{- end}}
+    {{end}}
+    {{range $k, $v := $memberRoles}}
+        {{- if eq $k 0}} 
+            {{- $roles = printf "- <@&%d>" .}}
+        {{- else }} 
+            {{- $roles = printf "%s\n- <@&%d>" $roles .}} 
+        {{- end -}}
+    {{end}}
+
+    {{$fields:= (cslice
+
+        (sdict "name" "User ID" "value" (str $user.ID) "inline" true)
+        (sdict "name" "\u200B" "value" "\u200B" "inline" true)
+        (sdict "name" "Bot" "value" ($user.Bot|json|str|title) "inline" true)
+        (sdict "name" "Nickname" "value" $nick "inline" true)
+        (sdict "name" "\u200B" "value" "\u200B" "inline" true)
+        (sdict "name" "Status" "value" $status "inline" true)
+        (sdict "name" "Joined Server At" "value" (print "📆 <t:" (str (toInt ($member.JoinedAt.Parse).Unix)) ":F>\n🕛 <t:" (str (toInt ($member.JoinedAt.Parse).Unix)) ":R>"))
+        (sdict "name" "Account Created" "value" (print "📆 <t:" (str $createdAt.Unix) ":F>\n🕛 <t:" (str $createdAt.Unix) ":R>"))
+        )
+    }}
+
+
+    {{$embed = sdict
+        "title" "User Information"
+        "description" (print "Given below is the information on the user " $user.Mention ". Use the optional `-p` and `-r` flags to view the user's permissions and/or roles!")
+        "fields" $fields
+        "color" $col
+        "thumbnail" (sdict "url" ($user.AvatarURL "1024"))
+        "footer" (sdict "text" (print "Triggered by " .User.String))
+        "timestamp" currentTime
+    }}
+
+
+    {{if eq $user.ID .Guild.OwnerID}}
+        {{$notable = "Server Owner"}}
+    {{else if (in (split (index (split (exec "viewperms" $user.ID) "\n") 2) ", ") "Administrator")}}
+        {{$notable = "Server Administrator"}}
+    {{else if and (in (split (index (split (exec "viewperms" $user.ID) "\n") 2) ", ") "ManageMessages") (in (split (index (split (exec "viewperms" $user.ID) "\n") 2) ", ") "BanMembers")}}
+        {{$notable = "Server staff"}}
+    {{end}}
+
+    {{if $strippedmsg}}
+        {{if reFind `(?i)-(p(?:erm(?:s|ission|issions)?)?|r(?:ole(?:s)?)?)\b` $strippedmsg}}
+            {{if and (reFind `(?i)-(p(?:erm(?:s|ission|issions)?)?)\b` $strippedmsg) (reFind `(?i)-(r(?:ole(?:s)?)?)\b` $strippedmsg)}}
+                {{$fields = (cslice
+                    (sdict "name" (print "Roles (" (len $member.Roles) ")") "value" (or $roles "User has no roles!"))
+                    (sdict "name" "Permissions" "value" $perms)
+                    (sdict "name" "Notable Features" "value" $notable)
+                    )
+                }}
+                {{$embed.Set "description" (print "Given below are the roles and permissions for the user " $user.Mention)}}
+            {{else if reFind `(?i)-(p(?:erm(?:s|ission|issions)?)?)\b` $strippedmsg}}
+                {{$fields = (cslice
+                    (sdict "name" "Permissions" "value" $perms)
+                    (sdict "name" "Notable Features" "value" $notable)
+                )}}
+                {{$embed.Set "description" (print "Given below are the permissions for the user " $user.Mention)}}
+            {{else if reFind `(?i)-(r(?:ole(?:s)?)?)\b` $strippedmsg}}
+                {{$fields = (cslice
+                    (sdict "name" (print "Roles (" (len $member.Roles) ")") "value" (or $roles "User has no roles!"))
+                )}}
+                {{$embed.Set "description" (print "Given below are the roles that " $user.Mention " has!")}}
+            {{end}}
+        {{$embed.Set "fields" $fields}}
+        {{end}}
+    {{end}}
+{{else if $user}}
+    {{$embed = sdict
+        "title" "User Information"
+        "description" (print "Given below is the information on " $user.String "! They are not in the server, which is why the information is limited!")
+        "thumbnail" (sdict "url" ($user.AvatarURL "1024"))
+        "color" (randInt 1 100000)
+        "author" (sdict "name" $user.String "icon_url" ($user.AvatarURL "1024") "url" (print "https://discord.com/users/" $user.ID))
+        "footer" (sdict "text" (print "Triggered by " .User.String))
+        "timestamp" currentTime
+        "fields" (cslice
+            (sdict "name" "User ID" "value" (str $user.ID) "inline" true)
+            (sdict "name" "\u200B" "value" "\u200B" "inline" true)
+            (sdict "name" "Bot" "value" ($user.Bot|json|str|title) "inline" true)
+            (sdict "name" "Account Created" "value" (print "📆 <t:" (str $createdAt.Unix) ":F>\n🕛 <t:" (str $createdAt.Unix) ":R>"))
+        )
+    }}
 {{end}}
 
 {{if not $error}}
     {{sendMessage nil (cembed $embed)}}
 {{else}}
-    {{sendMessage nil (cembed "title" "Error!" "description" $error)}}
+    {{sendMessage nil (cembed "title" "Error!" "description" (print "<:cross:915633544326447144> " $error) "color" 0xFF0000)}}
 {{end}}
