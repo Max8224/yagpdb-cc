@@ -1,0 +1,42 @@
+{{/*
+    Shows information about the server. Syntax is -serverinfo
+    
+    Trigger Type: Regex
+    Trigger: (?i)\A(-|<@!?204255221017214977>\s*)((server|guild)(-?info)|ui)(\s+|\z)
+    
+    Made by Max ツ#8224
+*/}}
+
+{{$ex := or (and (reFind "a_" .Guild.Icon) "gif" ) "png"}}{{$icon := print "https://cdn.discordapp.com/icons/" .Guild.ID "/" .Guild.Icon "." $ex "?size=1024"}}
+{{$levels := cslice "None" "Low" "Medium" "High" "Highest"}}{{$contentfilter := cslice "None" "Low" "High"}}
+
+{{$features := ""}}
+{{range .Guild.Features}}
+	{{$features = print $features "- " (reReplace `_` . " "|lower|title) "\n"}}
+{{end}}
+{{$features = print "```" $features "```"}}
+
+{{$createdAt := div .Guild.ID 4194304 | add 1420070400000 | mult 1000000 | toDuration | (newDate 1970 1 1 0 0 0).Add}}
+{{$time := print "```- Created " (currentTime.Sub $createdAt|toDuration|humanizeDurationHours|str) " ago \n- Created on " ($createdAt.Format "02 January 2006"|str) "```"}}
+
+{{$embed := cembed
+    "author" (sdict "name" .Guild.Name "icon_url" $icon)
+    "footer" (sdict "text" (print "Triggered by " .User.String) "icon_url" (.User.AvatarURL "1024"))
+    "title" .Guild.Name
+    "timestamp" currentTime
+    "thumbnail" (sdict "url" $icon)
+    "color" 0x7289da
+    "fields" (cslice
+        (sdict "name" "Server ID" "value" (print "```" (.Guild.ID|str) "```") "inline" true)
+        (sdict "name" "\u200B" "value" "\u200B" "inline" true)
+        (sdict "name" "Server Owner" "value" (print "```" (userArg .Guild.OwnerID).String "```") "inline" true)
+        (sdict "name" "Total Members" "value" (print "```" (str .Guild.MemberCount) "```") "inline" true)
+        (sdict "name" "\u200B" "value" "\u200B" "inline" true)
+        (sdict "name" "Online Members" "value" (print "```" (str onlineCount) "```") "inline" true)
+        (sdict "name" "Verification Level" "value" (print "```" (index $levels .Guild.VerificationLevel) "```") "inline" true)
+        (sdict "name" "\u200B" "value" "\u200B" "inline" true)
+        (sdict "name" "Explicit Content Filet" "value" (print "```" (index $contentfilter .Guild.ExplicitContentFilter) "```") "inline" true)
+        (sdict "name" "Created At" "value" $time)
+        (sdict "name" "Features" "value" $features)
+    )
+}}
