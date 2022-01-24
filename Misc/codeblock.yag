@@ -1,0 +1,47 @@
+{{$message := false}}{{$error := false}}{{$image := ""}}{{$desc := ""}}
+
+{{/*Command Handling*/}}
+{{if .CmdArgs}}
+    {{with reFind `\d{17,19}` (index .CmdArgs 0)}}
+        {{$message = getMessage nil .}}
+        {{with reFind `(?i)(-c(?:hannel)?\s+(?:<#)?(\d+)>?(?:\s+|$))` $.StrippedMsg}}
+            {{$message = getMessage (reFind `\d{17,19}` (reReplace `(?i).+-c(?:hannel)?\s+` $.StrippedMsg "")|toInt) (index $.CmdArgs 0|toInt)}}
+        {{end}}
+    {{else}}
+        {{$error = true}}
+    {{end}}
+{{else}}
+    {{$error = true}}
+{{end}}
+
+{{/*Stuff*/}}
+{{if not $error}}
+    {{$desc = (print "```" $message.Content "```")}}
+    {{if $message.Embeds}}
+        {{$desc = joinStr "\n\n" $desc "> __Note:__ This message has embeds, which cannot be shown by a codeblock"}}
+    {{end}}
+    {{with $message.Attachments}}
+        {{if eq (len .) 1}}
+            {{$image = (index . 0).ProxyURL}}
+        {{else}}
+            {{$desc = joinStr "\n\n" $desc "> __Note:__ This message has multiple attachments, which cannot be shown in an embed"}}
+        {{end}}
+    {{end}}
+    {{if reFind `\x60{3}(\s|\S)+\x60{3}` $message.Content}}
+        {{$desc = joinStr "\n\n" $desc "> __Note:__ This message has codeblocks, which mess up the structure of the command itself"}}
+    {{end}}
+{{end}}
+
+{{/*Sending message*/}}
+{{if not $error}}
+    {{$embed := cembed
+        "title" "Codeblock"
+        "description" $desc
+        "author" (sdict "name" $message.Author.String "icon_url" ($message.Author.AvatarURL "1024") "url" (print "https://discord.com/users/" $message.Author.ID))
+        "footer" (sdict "text" (print "Triggered by " .User.String ))
+        "timestamp" currentTime
+    }}
+    {{sendMessage nil $embed}}
+{{else}}
+    {{sendMessage nil "An error occured"}}
+{{end}}
