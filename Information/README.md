@@ -23,4 +23,4 @@ Command previews of the information commands
 ![More Stuff](https://media.discordapp.net/attachments/873806775915274270/933658615586385972/Screenshot_2022-01-20_at_3.15.55_PM.png?width=1764&height=1480)
 
 #### Server Info
-![Even More stuff](https://cdn.discordapp.com/attachments/885548605925097472/935395680082620506/Screenshot_2022-01-25_at_10.18.25_AM.png)
+![Even More stuff](https://cdn.discordapp.com/attachments/885548605925097472/935396072510078976/Screenshot_2022-01-25_at_10.19.59_AM.png)
