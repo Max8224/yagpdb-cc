@@ -25,7 +25,7 @@
     "title" .Guild.Name
     "timestamp" currentTime
     "thumbnail" (sdict "url" $icon)
-    "color" 0x7289da
+    "color" 0x2e313
     "fields" (cslice
         (sdict "name" "Server ID" "value" (print "```" (.Guild.ID|str) "```") "inline" true)
         (sdict "name" "\u200B" "value" "\u200B" "inline" true)
