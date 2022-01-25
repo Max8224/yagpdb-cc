@@ -1,3 +1,12 @@
+{{/*
+    Turns a given message id into a codeblock to view code more easily/to get the formatting of the message
+    
+    Trigger Type: Regex
+    Trigger \A(-|<@!?204255221017214977>)\s*(cb|codeblock)(?: +|\z)
+    
+    Made by Max ツ#8224
+*/}}
+
 {{$message := false}}{{$error := false}}{{$image := ""}}{{$desc := ""}}
 
 {{/*Command Handling*/}}
@@ -7,23 +16,29 @@
         {{with reFind `(?i)(-c(?:hannel)?\s+(?:<#)?(\d+)>?(?:\s+|$))` $.StrippedMsg}}
             {{$message = getMessage (reFind `\d{17,19}` (reReplace `(?i).+-c(?:hannel)?\s+` $.StrippedMsg "")|toInt) (index $.CmdArgs 0|toInt)}}
         {{end}}
+        {{if not $message}}
+            {{$error = "Invalid Message ID / Channel provided!"}}
+        {{end}}
     {{else}}
-        {{$error = true}}
+        {{$error = "No Message ID provided!"}}
     {{end}}
 {{else}}
-    {{$error = true}}
+    {{$error = "No Message ID provided!"}}
 {{end}}
 
 {{/*Stuff*/}}
 {{if not $error}}
-    {{$desc = (print "```" $message.Content "```")}}
+    {{with $message.Content}}
+        {{$desc = (print "```" . "```")}}
+    {{else}}
+        {{$desc = ""}}
+    {{end}}
     {{if $message.Embeds}}
         {{$desc = joinStr "\n\n" $desc "> __Note:__ This message has embeds, which cannot be shown by a codeblock"}}
     {{end}}
     {{with $message.Attachments}}
-        {{if eq (len .) 1}}
-            {{$image = (index . 0).ProxyURL}}
-        {{else}}
+        {{$image = (index . 0).ProxyURL}}
+        {{if eq (len .) 1|not}}
             {{$desc = joinStr "\n\n" $desc "> __Note:__ This message has multiple attachments, which cannot be shown in an embed"}}
         {{end}}
     {{end}}
@@ -39,9 +54,11 @@
         "description" $desc
         "author" (sdict "name" $message.Author.String "icon_url" ($message.Author.AvatarURL "1024") "url" (print "https://discord.com/users/" $message.Author.ID))
         "footer" (sdict "text" (print "Triggered by " .User.String ))
+        "image" $image
+        "color" 0x2e313
         "timestamp" currentTime
     }}
     {{sendMessage nil $embed}}
 {{else}}
-    {{sendMessage nil "An error occured"}}
+    {{sendMessage nil (cembed "title" "Error" "description" (print $error "\n\n**Syntax:**\n`" (lower .Cmd) " <Integer:Message ID> [-channel:Channel the message is in]`") "color" 0x2e313)}}
 {{end}}
