@@ -3,14 +3,13 @@ Commands that show information about certain components in Discord.
 
 ### Commands
 
-[User Info](./userinfo.yag) • [Avatar](./avatar.yag)
+[User Info](./userinfo.yag) • [Avatar](./avatar.yag) • [Server Information](./serverinfo.yag)
 
 ### Work In Progress
 Emoji Info
 • Role Info
 
 ### Stuff that might come in the future
-Server Info
 • Channel Info
 
 
@@ -22,3 +21,6 @@ Command previews of the information commands
 
 #### Avatar
 ![More Stuff](https://media.discordapp.net/attachments/873806775915274270/933658615586385972/Screenshot_2022-01-20_at_3.15.55_PM.png?width=1764&height=1480)
+
+#### Server Info
+![Even More stuff](https://cdn.discordapp.com/attachments/885548605925097472/935395680082620506/Screenshot_2022-01-25_at_10.18.25_AM.png)
