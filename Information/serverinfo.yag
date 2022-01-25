@@ -25,7 +25,7 @@
     "title" .Guild.Name
     "timestamp" currentTime
     "thumbnail" (sdict "url" $icon)
-    "color" 0x2e313
+    "color" 0x2e3137
     "fields" (cslice
         (sdict "name" "Server ID" "value" (print "```" (.Guild.ID|str) "```") "inline" true)
         (sdict "name" "\u200B" "value" "\u200B" "inline" true)
@@ -35,8 +35,9 @@
         (sdict "name" "Online Members" "value" (print "```" (str onlineCount) "```") "inline" true)
         (sdict "name" "Verification Level" "value" (print "```" (index $levels .Guild.VerificationLevel) "```") "inline" true)
         (sdict "name" "\u200B" "value" "\u200B" "inline" true)
-        (sdict "name" "Explicit Content Filet" "value" (print "```" (index $contentfilter .Guild.ExplicitContentFilter) "```") "inline" true)
+        (sdict "name" "Explicit Content Filter" "value" (print "```" (index $contentfilter .Guild.ExplicitContentFilter) "```") "inline" true)
         (sdict "name" "Created At" "value" $time)
         (sdict "name" "Features" "value" $features)
     )
 }}
+{{sendMessage nil $embed}}
