@@ -12,8 +12,8 @@
 
 {{/* Parsing arguments */}}
 {{if .CmdArgs}}
-    {{if reFind `(?i)<@!?\d{17,19}>|\d{17.19}` (index .CmdArgs 0)}}
-        {{with (userArg (index .CmdArgs 0))}}
+    {{if reFind `<@!?\d{17,19}>|\d{17,19}` (index .CmdArgs 0)}}
+        {{with userArg (index .CmdArgs 0|toInt)}}
             {{$member = getMember .ID}} {{$user = .}}
         {{else}}
             {{$error = "Invalid User provided! Make sure that the given user is still in the server!"}}
