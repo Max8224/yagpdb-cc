@@ -12,9 +12,9 @@
 
 {{/* Parsing arguments */}}
 {{if .CmdArgs}}
-    {{if reFind `<@!?\d{17,19}>|\d{17,19}` (index .CmdArgs 0)}}
-        {{with userArg (reFind `\d{17,19}` (index .CmdArgs 0)|toInt)}}
-            {{$member = getMember .ID}} {{$user = .}}
+    {{if reFind `(<@!?\d{17,19}>|\d{17,19})` (index .CmdArgs 0)}}
+        {{with (index .CmdArgs 0|getMember)}}
+            {{$member = .}} {{$user = .User}}
         {{else}}
             {{$error = "Invalid User provided! Make sure that the given user is still in the server!"}}
         {{end}}
@@ -46,7 +46,7 @@
     {{$replacements := sdict "ManageServer" "Manage server" "ReadMessages" "Read Messages" "SendMessages" "Send Messages" "SendTTSMessages" "Send TTS Messages" "ManageMessages" "Manage Messages" "EmbedLinks" "Embed Links" "AttachFiles" "Attach Files" "ReadMessageHistory" "Read Message History" "MentionEveryone" "Mention Everyone" "UseExternalEmojis" "Use External Emojis" "VoiceConnect" "Voice Connect" "VoiceSpeak" "Voice Speak" "VoiceMuteMembers" "Voice Mute Members" "VoiceDeafenMembers" "Voice Deafen Members" "VoiceMoveMembers" "Voice Move Members"  "VoiceUseVAD" "Voice Use VAD" "ChangeNickname" "Change Nickname" "ManageNicknames" "Manage Nicknames" "ManageRoles" "Manage Roles" "ManageWebhooks" "Manage Webhooks" "ManageEmojis" "Manage Emojis" "CreateInstantInvite" "Create Invites" "KickMembers" "Kick Members" "BanMembers" "Ban Members" "ManageChannels" "Manage Channels" "AddReactions" "Add Reactions" "ViewAuditLogs" "View Audit Logs"}}
     {{range $old, $new := $replacements}}
 		{{- $perms = joinStr $new (split $perms $old) -}}
-    {{end}}
+    {{- end}}
 
     {{$memberRoles := cslice}}
     {{range .Guild.Roles}}
@@ -91,13 +91,17 @@
     {{else if (in (split (index (split (exec "viewperms" $user.ID) "\n") 2) ", ") "Administrator")}}
         {{$notable = "Server Administrator"}}
     {{else if and (in (split (index (split (exec "viewperms" $user.ID) "\n") 2) ", ") "ManageMessages") (in (split (index (split (exec "viewperms" $user.ID) "\n") 2) ", ") "BanMembers")}}
-        {{$notable = "Server staff"}}
+        {{if $user.Bot}}
+            {{$notable = "Bot"}}
+        {{else}}
+            {{$notable = "Server staff"}}
+        {{end}}
     {{end}}
 
     {{/* Parsing flags */}}
     {{if $strippedmsg}}
-        {{if reFind `(?i)-(p(?:erm(?:s|ission|issions)?)?|r(?:ole(?:s)?)?)\b` $strippedmsg}}
-            {{if and (reFind `(?i)-(p(?:erm(?:s|ission|issions)?)?)\b` $strippedmsg) (reFind `(?i)-(r(?:ole(?:s)?)?)\b` $strippedmsg)}}
+        {{if reFind `(?i)(?: +|^)-(p(?:erm(?:s|ission|issions)?)?|r(?:ole(?:s)?)?)\b` $strippedmsg}}
+            {{if and (reFind `(?i)(?: +|^)-(p(?:erm(?:s|ission|issions)?)?)\b` $strippedmsg) (reFind `(?i)-(r(?:ole(?:s)?)?)\b` $strippedmsg)}}
                 {{$fields = (cslice
                     (sdict "name" (print "Roles (" (len $member.Roles) ")") "value" (or $roles "User has no roles!"))
                     (sdict "name" "Permissions" "value" $perms)
@@ -105,7 +109,7 @@
                     )
                 }}
                 {{$embed.Set "description" (print "Given below are the roles and permissions for the user " $user.Mention)}}
-            {{else if reFind `(?i)-(p(?:erm(?:s|ission|issions)?)?)\b` $strippedmsg}}
+            {{else if reFind `(?i)(?: +|^)-(p(?:erm(?:s|ission|issions)?)?)\b` $strippedmsg}}
                 {{$fields = (cslice
                     (sdict "name" "Permissions" "value" $perms)
                     (sdict "name" "Notable Features" "value" $notable)
