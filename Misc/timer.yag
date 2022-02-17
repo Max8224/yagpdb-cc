@@ -1,0 +1,35 @@
+{{/*
+    Creates a timer with a specific title and duration
+    
+    Trigger type: Command
+    Trigger: timer
+    Syntax: -timer <duration> <title>
+    
+    Created by Max ツ#8224
+*/}}
+
+{{$duration := 0}}{{$timer := "Timer"}}
+{{if not .ExecData}}
+    {{if .CmdArgs}}
+        {{if reFind `\D` (index .CmdArgs 0)|not}}
+            {{$duration = index .CmdArgs 0|toInt}}
+        {{else}}
+            {{$duration = (index .CmdArgs 0|toDuration).Seconds|toInt}}
+        {{end}}
+        {{if ge (len .CmdArgs) 2}}
+            {{$timer = reReplace (print (index .CmdArgs 0) `\s*`) .StrippedMsg ""}}
+        {{end}}
+        {{if $duration}}
+            {{$unix := (currentTime.Add (mult $duration 1000000000|toDuration)).Unix}}
+            {{$x := sendMessageRetID nil (cembed "title" $timer "description" (printf "**Ends:** <t:%d:R> (<t:%d>)\n**Hosted by:** %s" $unix $unix .User.Mention) "color" 0x2e3137 "footer" (sdict "text" "Timer") "timestamp" currentTime)}}
+            {{execCC .CCID nil $duration (sdict "MessageID" $x "UserID" .User.ID "Timer" $timer "Link" .Message.Link "Timestamp" $unix)}}
+        {{else}}
+            {{sendMessage nil (cembed "title" "Error" "description" "Something went wrong, please try again or file an issue in the [github repository!](https://github.com/Max-Almighty/yagpdb-cc/issues)")}}
+        {{end}}
+    {{else}}
+        {{sendMessage nil (cembed "title" "Error" "description" (print "Not enough argument parsed!\n**Syntax:** `<prefix/yag mention>timer <duration> <title>"))}}
+    {{end}}
+{{else}}
+    {{editMessage nil .ExecData.MessageID (cembed "title" "Timer Ended" "description" (printf "**Timer:** %s\n**Ended:** <t:%d:R> (<t:%d>)\n**Hosted by:** %s" .ExecData.Timer .ExecData.Timestamp .ExecData.Timestamp .User.Mention))}}
+    {{sendMessage nil (print "The timer for **" .ExecData.Timer "** is done!\n" .ExecData.Link)}}
+{{end}}
